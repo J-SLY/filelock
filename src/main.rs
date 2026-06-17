@@ -54,4 +54,5 @@ fn main() {
     let mut data = data;
     file_lock(&mut data,key);
     write_file(&data, &args.filename);
+    println!("文件{}已关于密钥{}异或",args.filename,key);
 }
