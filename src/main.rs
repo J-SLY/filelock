@@ -1,4 +1,4 @@
-use std::{fs, process};
+use std::{cmp::Ordering, fs, process};
 use clap::Parser;
 
 #[derive(Parser,Debug)]
@@ -9,8 +9,10 @@ struct Args{
     filename:String,
 
     #[arg(short,long)]
-    offset:usize
+    offset:usize,
 
+    #[arg(short)]
+    m:bool,
 }
 fn read_file(filename:&String)->Vec<u8>{
     match fs::read(filename){
@@ -28,11 +30,18 @@ fn read_file(filename:&String)->Vec<u8>{
         }
     }
 }
-fn check_offset(offset:usize,data:&Vec<u8>)->usize{
-    if offset >= data.len() {
-        offset % data.len()
-    }else{
-        offset
+fn check_offset(offset:usize,data:&Vec<u8>,is_mod:bool)->usize{
+    match is_mod{
+        true => offset%data.len(),
+        false => {
+            match offset.cmp(&data.len()){
+                Ordering::Greater|Ordering::Equal => {
+                    eprintln!("偏移量（{}）大于文件大小（{}）",offset,data.len());
+                    process::exit(1);
+                },
+                Ordering::Less => offset
+            }
+        }
     }
 }
 fn file_lock(data:&mut Vec<u8>,offset:u8){
@@ -49,7 +58,7 @@ fn write_file(data:&Vec<u8>,filename:&String){
 fn main() {
     let mut args = Args::parse();
     let data = read_file(&args.filename);
-    args.offset = check_offset(args.offset, &data);
+    args.offset = check_offset(args.offset, &data,args.m);
     let key = (args.offset % 256) as u8;
     let mut data = data;
     file_lock(&mut data,key);
