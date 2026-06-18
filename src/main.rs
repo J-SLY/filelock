@@ -17,15 +17,16 @@ struct Args{
 fn read_file(filename:&String)->Vec<u8>{
     match fs::read(filename){
         Ok(data) => {
-            if data.len() != 0 {
-                data
-            }else{
-                eprintln!("文件不能为空");
-                process::exit(1);
+            match data.len().cmp(&0usize){
+                Ordering::Equal|Ordering::Less => {
+                    eprintln!("文件不能为空");
+                    process::exit(1);
+                },
+                Ordering::Greater => data
             }
         },
         Err(e) => {
-            eprintln!("读取文件失败，{}",e);
+            eprintln!("读取文件失败，{e}");
             process::exit(1);
         }
     }
@@ -50,18 +51,25 @@ fn file_lock(data:&mut Vec<u8>,offset:u8){
     }
 }
 fn write_file(data:&Vec<u8>,filename:&String){
-    if let Err(e) = fs::write(filename,data){
-        eprintln!("文件写入失败，{}",e);
-        process::exit(1);
+    match fs::write(filename,data){
+        Ok(_) => (),
+        Err(e) => {
+            eprintln!("文件写入失败,{e}");
+            process::exit(1);
+        }
     }
 }
 fn main() {
     let mut args = Args::parse();
     let data = read_file(&args.filename);
+
     args.offset = check_offset(args.offset, &data,args.m);
+    
     let key = (args.offset % 256) as u8;
     let mut data = data;
+
     file_lock(&mut data,key);
     write_file(&data, &args.filename);
+
     println!("文件{}已关于密钥{}异或",args.filename,key);
 }
