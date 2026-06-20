@@ -1,10 +1,6 @@
 use std::{cmp::Ordering, fs, process};
 use clap::{Parser, Subcommand};
 
-
-/// Gat Args 
-/// 
-/// `filename:String`,`offset:usize`,`is_mod:bool`
 #[derive(Parser,Debug)]
 #[command(author,version,about,long_about=None)]
 struct Args{
@@ -12,6 +8,7 @@ struct Args{
     command:Commands,
     
 }
+
 #[derive(Subcommand, Debug)]
 enum Commands{
     Lock{
@@ -26,10 +23,7 @@ enum Commands{
         filename:String,
     }
 }
-/// # Example
-/// using **`let data:Vex<u8> = read_file(&file_name);`**
-/// to get file data, return a Vec\<u8\>.
-/// 
+ 
 fn read_file(filename:&String)->Vec<u8>{
     match fs::read(filename){
         Ok(data) => {
@@ -47,12 +41,7 @@ fn read_file(filename:&String)->Vec<u8>{
         }
     }
 }
-/// # Example
-/// using **`let key = check_offset(offset,&data,is_mod);`** to get right offset.
-/// 
-/// if `is_mod` is false and offset is greater than length of data, this function will throw an error and exit.
-///
-/// if `is_mod` is true, this function will return right offset.
+
 fn check_offset(offset:usize,data:&Vec<u8>)->usize{
     offset%data.len()
 }
@@ -62,6 +51,7 @@ fn file_lock(data:&mut Vec<u8>,offset:u8){
         *byte ^= offset;
     }
 }
+
 fn write_file(data:&Vec<u8>,filename:&String){
     match fs::write(filename,data){
         Ok(_) => (),
@@ -71,9 +61,11 @@ fn write_file(data:&Vec<u8>,filename:&String){
         }
     }
 }
+
 fn add_key(data:&mut Vec<u8>,key:u8){
     data.push(key);
 }
+
 fn main() {
     let args = Args::parse();
     match args.command {
@@ -106,5 +98,4 @@ fn main() {
             println!("文件{}已用密钥{}解密并移除密钥", filename, key);
         }
     }
-    
 }
