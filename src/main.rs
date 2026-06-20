@@ -67,6 +67,7 @@ fn write_file(data:&Vec<u8>,filename:&String){
 
 fn add_key(data:&mut Vec<u8>,key:u8){
     data.push(key);
+    data.extend_from_slice(b"FL");
 }
 
 fn main() {
@@ -89,8 +90,8 @@ fn main() {
         },
         Commands::Unlock{ filename }=>{
             let mut data = read_file(&filename);
-            if data.is_empty() {
-                eprintln!("文件不能为空或没有密钥");
+            if data.len() < 3 || data.split_off(data.len() - 2) != b"FL" {
+                eprintln!("文件未加密或格式不正确");
                 process::exit(1);
             }
             // 末尾字节作为密钥，读取并移除
