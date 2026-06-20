@@ -28,11 +28,11 @@ fn read_file(filename:&String)->Vec<u8>{
     match fs::read(filename){
         Ok(data) => {
             match data.len().cmp(&0usize){
-                Ordering::Equal|Ordering::Less => {
+                Ordering::Equal => {
                     eprintln!("文件不能为空");
                     process::exit(1);
                 },
-                Ordering::Greater => data
+                _ => data
             }
         },
         Err(e) => {
@@ -43,7 +43,10 @@ fn read_file(filename:&String)->Vec<u8>{
 }
 
 fn check_offset(offset:usize,data:&Vec<u8>)->usize{
-    offset%data.len()
+    let len = data.len();
+    if len == 0 { return 0; }
+    let result = offset % len;
+    if result == 0 && offset != 0 { len } else { result }
 }
 
 fn file_lock(data:&mut Vec<u8>,offset:u8){
@@ -81,7 +84,7 @@ fn main() {
             add_key(&mut data, key);
             write_file(&data, &filename);
 
-            println!("文件{}已关于密钥{}异或",filename,key);
+            println!("文件{}已用密钥{}加密",filename,key);
         
         },
         Commands::Unlock{ filename }=>{
