@@ -4,11 +4,12 @@ XOR 加密/解密文件的 CLI 工具，支持基于偏移量的密钥生成与�
 
 ## 安装
 
-```bash
-cargo install --path .
-```
+从 [Releases](https://github.com/J-SLY/filelock/releases) 下载预编译二进制，或自行编译：
 
-或直接从 [Releases](https://github.com/J-SLY/filelock/releases) 下载预编译二进制。
+```bash
+cargo build --release
+./target/release/filelock
+```
 
 ## 使用
 
